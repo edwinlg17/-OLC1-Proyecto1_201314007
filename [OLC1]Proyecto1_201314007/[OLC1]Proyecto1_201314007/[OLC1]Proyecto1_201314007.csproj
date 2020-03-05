@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F8C26823-F430-45F6-AE33-27C973250D98}</ProjectGuid>
+    <ProjectGuid>{27953586-A563-4F82-A4A4-DFBEC870E68F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>_OLC1_Proyecto1_201314007</RootNamespace>
     <AssemblyName>[OLC1]Proyecto1_201314007</AssemblyName>
@@ -54,6 +54,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -62,6 +65,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -75,6 +79,33 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\archivo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\guardar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\disco-flexible.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\mas.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\diagrama-de-flujo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\navegador.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\foto.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\foto%282%29.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
