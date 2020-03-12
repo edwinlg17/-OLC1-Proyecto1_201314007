@@ -8,21 +8,24 @@ namespace _OLC1_Proyecto1_201314007
 {
     class Token
     {
+
         /////////////////////////// ATRIBUTOS
         public String tok, lex;
-        public int fil, col;
+        public int fil, col, ide;
 
         /////////////////////////// CONSTRUCTOR
         public Token()
         {
+            this.ide = 0;
             this.tok = "";
             this.lex = "";
             this.fil = 0;
             this.col = 0;
         }
 
-        public Token(String tok, String lex, int fil, int col)
+        public Token(int ide, String tok, String lex, int fil, int col)
         {
+            this.ide = ide;
             this.tok = tok;
             this.lex = lex;
             this.fil = fil;
