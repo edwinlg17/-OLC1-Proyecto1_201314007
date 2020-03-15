@@ -37,6 +37,12 @@ namespace _OLC1_Proyecto1_201314007
             Console.WriteLine("//////////////////////// Analisis Lexico");
             AnalizadorLexico a = new AnalizadorLexico();
             a.analizar(tex);
+            ArrayList lisTok = a.lisTok;
+
+            foreach (Token t in lisTok)
+            {
+                Console.WriteLine("ID:" + t.ide + " TOK:" + t.tok + " LEX:" + t.lex + " FIL:" + t.fil + " COL:" + t.col);
+            }
 
 
 
