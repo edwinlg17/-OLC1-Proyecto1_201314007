@@ -10,7 +10,7 @@ namespace _OLC1_Proyecto1_201314007
     class AnalizadorLexico
     {
         /////////////////////////// ATRIBUTOS
-        public const String IDE = "tkIde", NUM = "tkNum", SIM = "tkSim", SES = "tkSes", COM = "tkCom", CAD = "tkCad";
+        public const String IDE = "tkIde", NUM = "tkNum", SIM = "tkSim", SES = "tkSes", COM = "tkCom", CAD = "tkCad", CON = "tkCon";
 
         public ArrayList lisTok;
 
@@ -131,7 +131,14 @@ namespace _OLC1_Proyecto1_201314007
                         else
                         {
                             est = 0; // cambio de estado
-                            lisTok.Add(new Token(0, IDE, lex, ft, ct));
+                            if (lex.ToLower().Equals("conj"))
+                            {
+                                lisTok.Add(new Token(0, CON, lex, ft, ct));
+                            }
+                            else 
+                            {
+                                lisTok.Add(new Token(0, IDE, lex, ft, ct));
+                            }
                             //Console.WriteLine(IDE + " -> " + lex + " 0" + " - fil: " + ft + " - col: " + ct);
                             lex = "";
                         }

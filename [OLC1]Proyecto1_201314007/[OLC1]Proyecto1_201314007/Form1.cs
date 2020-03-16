@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,16 +36,19 @@ namespace _OLC1_Proyecto1_201314007
             String tex = tcPes.SelectedTab.Controls[0].Text;
 
             Console.WriteLine("//////////////////////// Analisis Lexico");
-            AnalizadorLexico a = new AnalizadorLexico();
-            a.analizar(tex);
-            ArrayList lisTok = a.lisTok;
+            AnalizadorLexico l = new AnalizadorLexico();
+            l.analizar(tex);
+
+            AnalizadorSintactico s = new AnalizadorSintactico();
+            s.analizar(l.lisTok);
+
+
+            /*ArrayList lisTok = l.lisTok;
 
             foreach (Token t in lisTok)
             {
                 Console.WriteLine("ID:" + t.ide + " TOK:" + t.tok + " LEX:" + t.lex + " FIL:" + t.fil + " COL:" + t.col);
-            }
-
-
+            }*/
 
             //TreeNode n = new TreeNode("Directorio 1");
 
@@ -110,6 +114,7 @@ namespace _OLC1_Proyecto1_201314007
             {
                 System.IO.StreamWriter file = new System.IO.StreamWriter((String)ruts[tcPes.SelectedIndex]);
                 file.WriteLine(tcPes.SelectedTab.Controls[0].Text);
+                tcPes.SelectedTab.Text = Path.GetFileName((String)ruts[tcPes.SelectedIndex]);
                 file.Close();
             }
         }
@@ -166,6 +171,7 @@ namespace _OLC1_Proyecto1_201314007
                 System.IO.StreamWriter file = new System.IO.StreamWriter(sfd.FileName);
                 file.WriteLine(tcPes.SelectedTab.Controls[0].Text);
                 ruts[tcPes.SelectedIndex] = sfd.FileName;
+                tcPes.SelectedTab.Text = Path.GetFileName(sfd.FileName);
                 file.Close();
             }
         }
