@@ -10,7 +10,7 @@ namespace _OLC1_Proyecto1_201314007
     class AnalizadorLexico
     {
         /////////////////////////// ATRIBUTOS
-        public const String IDE = "tkIde", NUM = "tkNum", SIM = "tkSim", SES = "tkSes", COM = "tkCom", CAD = "tkCad", CON = "tkCon";
+        public const String IDE = "tkIde", NUM = "tkNum", SIM = "tkSim", SES = "tkSes", COM = "tkCom", CAD = "tkCad", CON = "tkCon", TOD = "tkTod";
 
         public ArrayList lisTok;
 
@@ -83,9 +83,18 @@ namespace _OLC1_Proyecto1_201314007
                             ct = col;
                             col++;
                         }
+                        ////////// cadenas
                         else if (car == '"')
                         {
                             est = 7; // cambio estado
+                            ft = fil;
+                            ct = col;
+                            col++;
+                        }
+                        ////////// cadenas
+                        else if (car == '[')
+                        {
+                            est = 15; // cambio estado
                             ft = fil;
                             ct = col;
                             col++;
@@ -135,7 +144,7 @@ namespace _OLC1_Proyecto1_201314007
                             {
                                 lisTok.Add(new Token(0, CON, lex, ft, ct));
                             }
-                            else 
+                            else
                             {
                                 lisTok.Add(new Token(0, IDE, lex, ft, ct));
                             }
@@ -277,11 +286,7 @@ namespace _OLC1_Proyecto1_201314007
                         break;
                     ////////////////////////// estado 7 Cadenas
                     case 7:
-                        if (car == '[')
-                        {
-                            est = 10; // cambio estado
-                        }
-                        else if (car == '\\')
+                        if (car == '\\')
                         {
                             est = 11; // cambio estado
                         }
@@ -303,47 +308,7 @@ namespace _OLC1_Proyecto1_201314007
                         col++;
                         ind++; // cambio caracter
                         break;
-                    // estado 10
-                    case 10:
-                        if (car == ':')
-                        {
-                            est = 13; // cambio estado
-                            col++;
-                            ind++; // cambio caracter
-                        }
-                        else
-                        {
-                            est = 7; // cambio estado
-                        }
-                        break;
-                    // estado 13
-                    case 13:
-                        if (car == ':')
-                        {
-                            est = 14; // cambio estado
-                        }
-                        else
-                        {
-                            lex += car; // cambio estado
-                        }
-                        col++;
-                        ind++; // cambio caracter
-                        break;
-                    // estado 14
-                    case 14:
-                        if (car == ']')
-                        {
-                            est = 7; // cambio estado
-                            col++;
-                            ind++; // cambio caracter
-                        }
-                        else
-                        {
-                            est = 13; // cambio estado
-                            lex += ':';
-                        }
-                        break;
-                    // estado 13
+                    // estado 11
                     case 11:
                         if (esSim(car))
                         {
@@ -356,6 +321,80 @@ namespace _OLC1_Proyecto1_201314007
                         {
                             est = 7; // cambio estado
                             lex += '\\';
+                        }
+                        break;
+                    ////////////////////////// estado 15 Todo
+                    // estado 15
+                    case 15:
+                        if (car == ':')
+                        {
+                            est = 16; // cambio estado
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        else
+                        {
+                            est = 0; // cambio estado
+                            lisTok.Add(new Token((int)'[', SIM, "[", ft, ct));
+                        }
+                        break;
+                    // estado 16
+                    case 16:
+                        
+                        if (car == ':')
+                        {
+                            est = 17; // cambio estado
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        else if (car == '\\')
+                        {
+                            est = 18; // cambio estado
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        else if (esSim(car) | esLet(car) | esNum(car) | car == ' ')
+                        {
+                            lex += car;
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        else
+                        {
+                            Console.WriteLine("ERROR LEX: ->" + car + "<-");
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        break;
+                    // estado 17
+                    case 17:
+                        if (car == ']')
+                        {
+                            est = 0;
+                            lisTok.Add(new Token(5, TOD, lex, ft, ct));
+                            //Console.WriteLine("LEX: " + lex);
+                            lex = "";
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        else
+                        {
+                            est = 16;
+                            lex += ':';
+                        }
+                        break;
+                    // estado 18
+                    case 18:
+                        est = 16;
+                        if (esSimEsp(car))
+                        {
+                            lex += car;
+                            col++;
+                            ind++; // cambio caracter
+                        }
+                        else
+                        {
+                            lex += '/';
                         }
                         break;
                 }

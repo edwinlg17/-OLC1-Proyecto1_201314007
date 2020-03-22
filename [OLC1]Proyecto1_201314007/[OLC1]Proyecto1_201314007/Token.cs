@@ -10,7 +10,7 @@ namespace _OLC1_Proyecto1_201314007
     {
 
         /////////////////////////// ATRIBUTOS
-        public const String IDE = "tkIde", NUM = "tkNum", SIM = "tkSim", SES = "tkSes", COM = "tkCom", CAD = "tkCad", CON = "tkCon";
+        public const String IDE = "tkIde", NUM = "tkNum", SIM = "tkSim", SES = "tkSes", COM = "tkCom", CAD = "tkCad", CON = "tkCon", TOD = "tkTod", EPS = "tkEps";
         public String tok, lex;
         public int fil, col, ide;
 
