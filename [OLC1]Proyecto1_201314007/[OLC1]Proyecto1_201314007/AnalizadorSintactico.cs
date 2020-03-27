@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace _OLC1_Proyecto1_201314007
     class AnalizadorSintactico
     {
         /////////////////////////// ATRIBUTOS
-        ArrayList lisTok;
+        ArrayList lisTok, lisGra, tabEst, lisAut;
         int ind, ind2;
         Token tem;
         LisNod tom;
@@ -19,7 +20,10 @@ namespace _OLC1_Proyecto1_201314007
         public AnalizadorSintactico()
         {
             this.lisTok = new ArrayList();
-            this.tom = new LisNod();
+            this.lisGra = new ArrayList();
+            this.tabEst = new ArrayList();
+            this.lisAut = new ArrayList();
+            this.tom = new LisNod("");
             this.tem = new Token();
             ind = 0;
         }
@@ -39,7 +43,11 @@ namespace _OLC1_Proyecto1_201314007
         {
 
             if (verificar(Token.CON)) con();
-            else if (verificar(Token.IDE)) oe();
+            else if (verificar(Token.IDE))
+            {
+                tom = new LisNod(tem.lex);
+                oe();
+            }
             else error();
 
             if (ind < lisTok.Count) ini();
@@ -449,10 +457,55 @@ namespace _OLC1_Proyecto1_201314007
             ind2 = 0;
             numGra(nt);
             eliVac(nt);
-            tom = new LisNod();
             impGra(nt);
-            tom.impLis();
+
+            tom.reNum();
             tom.anaLis();
+            lisGra.Add(tom);
+            tabEst.Add(tom.genTabTra());
+            lisAut.Add(tom.genAut());
+
+
+            ////////////////////////////////
+            genGrafos();
+
+
+        }
+
+        public void genGrafos()
+        {
+            String cod = "";
+
+            LisNod ln;
+            for (int i = 0; i < lisGra.Count; i++)
+            {
+                cod = "digraph G {\nrankdir=LR;\n";
+                ln = (LisNod)lisGra[i];
+                cod += ln.genCodGra();
+                cod += "}\n\n";
+
+                // ruta del escritorio
+                Environment.CurrentDirectory = Environment.GetEnvironmentVariable("USERPROFILE");
+                DirectoryInfo info = new DirectoryInfo(".");
+
+                // creo el archivo
+                System.IO.StreamWriter file = new System.IO.StreamWriter(info.FullName + "/Desktop/Diagramas/gra_" + ln.nom + ".dot");
+                file.WriteLine(cod);
+                file.Close();
+
+                // genero la imagen
+                String comando = "dot " + info.FullName + "/Desktop/Diagramas/gra_" + ln.nom + ".dot -o " + info.FullName + "/Desktop/Diagramas/gra_" + ln.nom + ".png -Tpng -Gcharset=utf8";
+                System.Diagnostics.ProcessStartInfo procStartInfo = new System.Diagnostics.ProcessStartInfo("cmd", "/c " + comando);
+                procStartInfo.RedirectStandardOutput = true;
+                procStartInfo.UseShellExecute = false;
+                procStartInfo.CreateNoWindow = false;
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                proc.StartInfo = procStartInfo;
+                proc.Start();
+                string result = proc.StandardOutput.ReadToEnd();
+
+            }
+
         }
 
     }
@@ -460,12 +513,16 @@ namespace _OLC1_Proyecto1_201314007
     class LisNod
     {
         /////////////////////
-        public ArrayList lis;
+        public ArrayList lis, lisCon;
+        public String nom;
+        public int fin;
 
         /////////////////////
-        public LisNod()
+        public LisNod(String nom)
         {
+            this.nom = nom;
             this.lis = new ArrayList();
+            this.fin = -1;
         }
 
         /////////////////////
@@ -487,9 +544,9 @@ namespace _OLC1_Proyecto1_201314007
                 lis.Add(new NodList(id, nue));
         }
 
-        public void impLis()
+        public String genCodGra()
         {
-            reNum();
+            String cod = "";
             NodList nl;
             for (int i = 0; i < lis.Count; i++)
             {
@@ -498,9 +555,11 @@ namespace _OLC1_Proyecto1_201314007
                 for (int j = 0; j < nl.lis.Count; j++)
                 {
                     nc = (NodCon)nl.lis[j];
-                    Console.Write(nl.id + "->" + nc.id + "[label=\"" + nc.tk.lex + "\"];\n");
+                    cod += nl.id + "->" + nc.id + "[label=\"" + nc.tk.lex + "\"];\n";
                 }
             }
+
+            return cod;
         }
 
         public void reNum()
@@ -528,6 +587,9 @@ namespace _OLC1_Proyecto1_201314007
                 if ((int)t[i] != i)
                     remNum((int)t[i], i);
             }
+
+            t.Sort();
+            fin = t.Count - 1;
         }
 
         public void remNum(int a, int n)
@@ -551,7 +613,7 @@ namespace _OLC1_Proyecto1_201314007
         // Analizar Grafo
         public void anaLis()
         {
-            ArrayList lisCon = new ArrayList();
+            lisCon = new ArrayList();
 
             // Cerradura de 0
             ArrayList tem = new ArrayList();
@@ -560,16 +622,8 @@ namespace _OLC1_Proyecto1_201314007
             lisCon.Add(new SubCon('c', 0, tokEps(), obtCer(tem, tokEps()), ind++));
 
             // Terminales
-            Console.WriteLine("//////////////////");
             ArrayList ter = obtTer();
-            /*Token tk;
-            for (int i = 0; i < ter.Count; i++)
-            {
-                tk = (Token)ter[i];
-                Console.WriteLine("ID:" + tk.ide + " TK:" + tk.tok + " LE:" + tk.lex);
-            }*/
 
-            Console.WriteLine("//////////////////");
             SubCon s;
             for (int i = 0; i < lisCon.Count; i++)
             {
@@ -596,9 +650,10 @@ namespace _OLC1_Proyecto1_201314007
                 {
                     if (s.lis.Count > 0)
                     {
-                        int con = verCon(lisCon, s.lis, 'c');
+                        ArrayList ct = obtCer(s.lis, tokEps());
+                        int con = verCon(lisCon, ct, 'c');
                         if (con == -1)
-                            lisCon.Add(new SubCon('c', 0, tokEps(), obtCer(s.lis, tokEps()), s.con));
+                            lisCon.Add(new SubCon('c', 0, tokEps(), ct, s.con));
                     }
                 }
 
@@ -621,7 +676,67 @@ namespace _OLC1_Proyecto1_201314007
 
                 Console.WriteLine();
             }
+        }
 
+        public ArrayList genTabTra()
+        {
+            ArrayList tab = new ArrayList();
+
+            SubCon s;
+            for (int i = 0; i < lisCon.Count; i++)
+            {
+                s = (SubCon)lisCon[i];
+
+                if (s.tip == 'c')
+                {
+                    Est est = new Est(s.con, genLisTra());
+                    SubCon t;
+                    for (int j = 0; j < lisCon.Count; j++)
+                    {
+                        t = (SubCon)lisCon[j];
+                        if (t.tip == 'm')
+                            if (t.mue == s.con)
+                                est.agregar(new Tra(t.tok, t.con));
+                    }
+                    tab.Add(est);
+                }
+
+            }
+            return tab;
+        }
+
+        public ArrayList genLisTra()
+        {
+            ArrayList ter = obtTer();
+            ArrayList nue = new ArrayList();
+
+            Token tok;
+            for (int i = 0; i < ter.Count; i++)
+            {
+                tok = (Token)ter[i];
+                nue.Add(new Tra(tok, -1));
+            }
+            return nue;
+        }
+
+        public Aut genAut()
+        {
+            Aut aut = new Aut(this.nom);
+
+            SubCon s;
+            for (int i = 0; i < lisCon.Count; i++)
+            {
+                s = (SubCon)lisCon[i];
+
+                if (s.tip == 'c')
+                    if (s.lis.Contains(fin))
+                        aut.agrEstFin(s.con);
+
+                if (s.tip == 'm')
+                    aut.agreEnl(new Enl(s.mue, s.con, s.tok));
+
+            }
+            return aut;
         }
 
         // Verificar y Buscar
@@ -835,6 +950,101 @@ namespace _OLC1_Proyecto1_201314007
 
         /////////////////////
 
+
+    }
+
+    ///////////////////// Automata
+    class Aut
+    {
+        /////////////////////
+        public String nom;
+        public ArrayList lisEnl, estFin;
+
+        /////////////////////
+        public Aut(String nom)
+        {
+            this.nom = nom;
+            this.lisEnl = new ArrayList();
+            this.estFin = new ArrayList();
+        }
+
+        /////////////////////
+        public void agreEnl(Enl enl)
+        {
+            this.lisEnl.Add(enl);
+        }
+
+        public void agrEstFin(int e)
+        {
+            estFin.Add(e);
+        }
+
+
+    }
+
+    class Enl
+    {
+        /////////////////////
+        public int ini, fin;
+        public Token tok;
+
+        /////////////////////
+        public Enl(int ini, int fin, Token tok)
+        {
+            this.ini = ini;
+            this.fin = fin;
+            this.tok = tok;
+        }
+
+        /////////////////////
+
+    }
+
+    ///////////////////// Tabla de Transiciones 
+    class Est
+    {
+        /////////////////////
+        public int est;
+        public ArrayList lisTra;
+
+        /////////////////////
+        public Est(int est, ArrayList lisTra)
+        {
+            this.est = est;
+            this.lisTra = lisTra;
+        }
+
+        /////////////////////
+        public void agregar(Tra tra)
+        {
+            Tra t;
+            for (int i = 0; i < lisTra.Count; i++)
+            {
+                t = (Tra)lisTra[i];
+                if (t.tok.Equals(tra.tok))
+                {
+                    t.est = tra.est;
+                    break;
+                }
+            }
+        }
+
+    }
+
+    class Tra
+    {
+        /////////////////////
+        public Token tok;
+        public int est;
+
+        /////////////////////
+        public Tra(Token tok, int est)
+        {
+            this.tok = tok;
+            this.est = est;
+        }
+
+        /////////////////////
 
     }
 
