@@ -30,10 +30,10 @@
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.archivoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.miNuePes = new System.Windows.Forms.ToolStripMenuItem();
             this.miAbri = new System.Windows.Forms.ToolStripMenuItem();
             this.miGua = new System.Windows.Forms.ToolStripMenuItem();
             this.miGuaCom = new System.Windows.Forms.ToolStripMenuItem();
-            this.miNuePes = new System.Windows.Forms.ToolStripMenuItem();
             this.analisisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miAna = new System.Windows.Forms.ToolStripMenuItem();
             this.miGenAut = new System.Windows.Forms.ToolStripMenuItem();
@@ -79,6 +79,13 @@
             this.archivoToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
             this.archivoToolStripMenuItem.Text = "Archivo";
             // 
+            // miNuePes
+            // 
+            this.miNuePes.Name = "miNuePes";
+            this.miNuePes.Size = new System.Drawing.Size(180, 22);
+            this.miNuePes.Text = "Nueva Pestaña";
+            this.miNuePes.Click += new System.EventHandler(this.miNuePes_Click);
+            // 
             // miAbri
             // 
             this.miAbri.Name = "miAbri";
@@ -99,13 +106,6 @@
             this.miGuaCom.Size = new System.Drawing.Size(180, 22);
             this.miGuaCom.Text = "Guardar Como";
             this.miGuaCom.Click += new System.EventHandler(this.miGuaCom_Click);
-            // 
-            // miNuePes
-            // 
-            this.miNuePes.Name = "miNuePes";
-            this.miNuePes.Size = new System.Drawing.Size(180, 22);
-            this.miNuePes.Text = "Nueva Pestaña";
-            this.miNuePes.Click += new System.EventHandler(this.miNuePes_Click);
             // 
             // analisisToolStripMenuItem
             // 
@@ -136,6 +136,7 @@
             this.miRep.Name = "miRep";
             this.miRep.Size = new System.Drawing.Size(180, 22);
             this.miRep.Text = "Generar Reporte";
+            this.miRep.Click += new System.EventHandler(this.miRep_Click);
             // 
             // panel1
             // 

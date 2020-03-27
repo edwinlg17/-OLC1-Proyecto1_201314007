@@ -13,12 +13,13 @@ namespace _OLC1_Proyecto1_201314007
         ArrayList lisTok;
         int ind, ind2;
         Token tem;
-        NodoGrafo ntem;
+        LisNod tom;
 
         /////////////////////////// CONSTRUCTOR
         public AnalizadorSintactico()
         {
             this.lisTok = new ArrayList();
+            this.tom = new LisNod();
             this.tem = new Token();
             ind = 0;
         }
@@ -128,9 +129,7 @@ namespace _OLC1_Proyecto1_201314007
             NodoGrafo nt = ter();
             if (nt != null)
             {
-                ind2 = 0;
-                numGra(nt);
-                impGra(nt);
+                anaGra(nt);
                 return true;
             }
 
@@ -140,10 +139,10 @@ namespace _OLC1_Proyecto1_201314007
         private NodoGrafo ter()
         {
             if (verificar(Token.CAD))
-                return new NodoGrafo(-1, null, null, tem, null, -1);
+                return new NodoGrafo(-1, null, null, tem, null, 'e');
 
             else if (verificar(Token.NUM))
-                return new NodoGrafo(-1, null, null, tem, null, -1);
+                return new NodoGrafo(-1, null, null, tem, null, 'e');
 
             else if (verificar(Token.SIM, "{"))
             {
@@ -151,7 +150,7 @@ namespace _OLC1_Proyecto1_201314007
                 {
                     Token t = tem;
                     if (verificar(Token.SIM, "}"))
-                        return new NodoGrafo(-1, null, null, t, null, -1);
+                        return new NodoGrafo(-1, null, null, t, null, 'e');
                 }
             }
             else
@@ -186,16 +185,20 @@ namespace _OLC1_Proyecto1_201314007
                 if (datA != null)
                     return plaRepCer(datA);
             }
-            /*else if (verificar(Token.SIM, "+"))
+            else if (verificar(Token.SIM, "+"))
             {
-                if (ter())
-                    return true;
+                NodoGrafo datA = ter();
+                NodoGrafo datB = new NodoGrafo(-1, null, null, datA.eIzq, null, 'e');
+                if (datA != null)
+                    return plaCon(datA, plaRepCer(datB));
             }
             else if (verificar(Token.SIM, "?"))
             {
-                if (ter())
-                    return true;
-            }*/
+                NodoGrafo datA = ter();
+                NodoGrafo datB = new NodoGrafo(-1, null, null, nodEps(), null, 'e');
+                if (datA != null)
+                    return plaSel(datA, datB);
+            }
 
             return null;
         }
@@ -254,14 +257,19 @@ namespace _OLC1_Proyecto1_201314007
             }
         }
 
+        /////////////////////
         private NodoGrafo plaCon(NodoGrafo datA, NodoGrafo datB)
         {
             NodoGrafo nta = obtUlt(datA);
             NodoGrafo ntb = obtUlt(datB);
             NodoGrafo nf = new NodoGrafo();
 
+            datA.tip = 'a';
+
             nta.izq = datB;
             ntb.izq = nf;
+
+            nf.tip = 'A';
 
             return datA;
         }
@@ -276,36 +284,23 @@ namespace _OLC1_Proyecto1_201314007
             NodoGrafo nf = new NodoGrafo();
 
             ni.izq = datA;
-            ni.der = datB;
             ni.eIzq = nodEps();
+            ni.der = datB;
             ni.eDer = nodEps();
-            ni.pos = 0;
+            ni.tip = 's';
 
-            if (datA != nta)
-            {
-                nta.izq = nf;
-                nta.eIzq = nodEps();
-            }
-            else 
-            {
-                datA.izq = nra;
-                nra.izq = nf;
-                nra.eIzq = nodEps();
-            }
+            nta.izq = nra;
+            ntb.izq = nrb;
 
-            if (datB != ntb)
-            {
-                ntb.der = nf;
-                ntb.eDer = nodEps();
-            }
-            else
-            {
-                datB.izq = nrb;
-                nrb.der = nf;
-                nrb.eDer = nodEps();
-            }
+            nra.izq = nf;
+            nra.eIzq = nodEps();
+            nra.tip = 'E';
 
-            nf.pos = 1;
+            nrb.der = nf;
+            nrb.eDer = nodEps();
+            nrb.tip = 'E';
+
+            nf.tip = 'S';
 
             return ni;
         }
@@ -318,24 +313,26 @@ namespace _OLC1_Proyecto1_201314007
             NodoGrafo nf = new NodoGrafo();
 
             ni.izq = datA;
-            ni.der = nf;
-            nta.izq = nra;
-            nra.der = datA;
-            nra.izq = nf;
-
             ni.eIzq = nodEps();
+            ni.der = nf;
             ni.eDer = nodEps();
-            nra.eIzq = nodEps();
-            nra.eDer = nodEps();
+            ni.tip = 'c';
 
-            ni.pos = 0;
-            nf.pos = 1;
-            nra.pos = 2;
+            nta.izq = nra;
+
+            nra.izq = datA;
+            nra.eIzq = nodEps();
+            nra.der = nf;
+            nra.eDer = nodEps();
+            nra.tip = 'r';
+
+            nf.tip = 'C';
 
             return ni;
         }
 
-        private Token nodEps()
+        /////////////////////
+        public Token nodEps()
         {
             return new Token(0, Token.EPS, "ε", 0, 0);
         }
@@ -346,7 +343,8 @@ namespace _OLC1_Proyecto1_201314007
             {
                 if (nt.izq == null & nt.der == null)
                     return nt;
-                if (nt.izq != null & nt.pos != 2)
+
+                if (nt.izq != null & nt.tip != 'r')
                     return obtUlt(nt.izq);
                 if (nt.der != null)
                     return obtUlt(nt.der);
@@ -354,40 +352,490 @@ namespace _OLC1_Proyecto1_201314007
             return null;
         }
 
+        ///////////////////// otras metodos
         private void impGra(NodoGrafo nt)
         {
             if (nt != null)
             {
-                if (nt.izq != null)//& nt.eIzq != null
+                if (nt.izq != null)
                 {
-                    Console.WriteLine(nt.ide + "->" + nt.izq.ide + "[label=\"" + nt.eIzq.lex + "\"];");
-                    if (nt.pos != 2 & nt.izq.pos != 1)
+                    if (nt.eIzq != null)
+                        //Console.WriteLine(nt.tip + "" + nt.ide + "->" + nt.izq.tip + nt.izq.ide + "[label=\"" + " IZQ " + nt.eIzq.lex + "\"];");
+                        tom.agregar(nt.ide, new NodCon(nt.izq.ide, nt.eIzq));
+                    else
+                        Console.WriteLine(nt.tip + "" + nt.ide + "->" + nt.izq.tip + nt.izq.ide + "[label=\"" + "IZQ" + "\"];");
+                    if (nt.tip != 'r')
                         impGra(nt.izq);
                 }
 
-                if (nt.der != null)//& nt.eDer != null
+                if (nt.der != null)
                 {
-                    Console.WriteLine(nt.ide + "->" + nt.der.ide + "[label=\"" + nt.eDer.lex + "\"];");
+                    if (nt.eDer != null)
+                        //Console.WriteLine(nt.tip + "" + nt.ide + "->" + nt.der.tip + nt.der.ide + "[label=\"" + " DER " + nt.eDer.lex + "\"];");
+                        tom.agregar(nt.ide, new NodCon(nt.der.ide, nt.eDer));
+                    else
+                        Console.WriteLine(nt.tip + "" + nt.ide + "->" + nt.der.tip + nt.der.ide + "[label=\"" + "DER" + "\"];");
+
                     impGra(nt.der);
                 }
             }
         }
-
 
         private void numGra(NodoGrafo nt)
         {
             if (nt != null)
             {
                 nt.ide = ind2++;
-                if (nt.izq != null & nt.eIzq != null)
-                    if (nt.izq.pos != 1)
+
+                if (nt.izq != null)
+                    if (nt.tip != 'r')
                         numGra(nt.izq);
-                if (nt.der != null & nt.eDer != null)
+
+                if (nt.der != null)
                     numGra(nt.der);
             }
         }
 
+        private void eliVac(NodoGrafo nt)
+        {
+            if (nt != null)
+            {
+                if (nt.izq != null)
+                    if (nt.izq.izq != null)
+                        if (nt.izq.eIzq == null)
+                            nt.izq = obtNod(nt.izq);
+
+                if (nt.der != null)
+                    if (nt.der.izq != null)
+                        if (nt.der.eIzq == null)
+                            nt.der = obtNod(nt.der);
+
+                if (nt.tip != 'r')
+                    if (nt.izq != null)
+                        eliVac(nt.izq);
+
+                if (nt.der != null)
+                    eliVac(nt.der);
+            }
+        }
+
+        private NodoGrafo obtNod(NodoGrafo nt)
+        {
+            if (nt != null)
+            {
+                if (nt.izq != null)
+                    if (nt.eIzq != null)
+                        return nt;
+
+                if (nt.izq == null & nt.der == null)
+                    return nt;
+
+                if (nt.tip != 'r')
+                    if (nt.izq != null)
+                        return obtNod(nt.izq);
+
+                if (nt.der != null)
+                    return obtNod(nt.der);
+            }
+
+            return null;
+        }
+
+        /////////////////////
+
+        private void anaGra(NodoGrafo nt)
+        {
+            Console.WriteLine();
+            ind2 = 0;
+            numGra(nt);
+            eliVac(nt);
+            tom = new LisNod();
+            impGra(nt);
+            tom.impLis();
+            tom.anaLis();
+        }
+
+    }
+
+    class LisNod
+    {
+        /////////////////////
+        public ArrayList lis;
+
+        /////////////////////
+        public LisNod()
+        {
+            this.lis = new ArrayList();
+        }
+
+        /////////////////////
+        public void agregar(int id, NodCon nue)
+        {
+            Boolean ver = true;
+            NodList nt;
+            for (int i = 0; i < lis.Count; i++)
+            {
+                nt = (NodList)lis[i];
+                if (nt.id == id)
+                {
+                    nt.agregar(nue);
+                    ver = false;
+                    break;
+                }
+            }
+            if (ver)
+                lis.Add(new NodList(id, nue));
+        }
+
+        public void impLis()
+        {
+            reNum();
+            NodList nl;
+            for (int i = 0; i < lis.Count; i++)
+            {
+                nl = (NodList)lis[i];
+                NodCon nc;
+                for (int j = 0; j < nl.lis.Count; j++)
+                {
+                    nc = (NodCon)nl.lis[j];
+                    Console.Write(nl.id + "->" + nc.id + "[label=\"" + nc.tk.lex + "\"];\n");
+                }
+            }
+        }
+
+        public void reNum()
+        {
+            NodList nl;
+            ArrayList t = new ArrayList();
+            for (int i = 0; i < lis.Count; i++)
+            {
+                nl = (NodList)lis[i];
+                if (!t.Contains(nl.id))
+                    t.Add(nl.id);
+                NodCon nc;
+                for (int j = 0; j < nl.lis.Count; j++)
+                {
+                    nc = (NodCon)nl.lis[j];
+                    if (!t.Contains(nc.id))
+                        t.Add(nc.id);
+                }
+            }
+            t.Sort();
+
+            for (int i = 0; i < t.Count; i++)
+            {
+                int n = (int)t[i];
+                if ((int)t[i] != i)
+                    remNum((int)t[i], i);
+            }
+        }
+
+        public void remNum(int a, int n)
+        {
+            NodList nl;
+            for (int i = 0; i < lis.Count; i++)
+            {
+                nl = (NodList)lis[i];
+                if (nl.id == a)
+                    nl.id = n;
+                NodCon nc;
+                for (int j = 0; j < nl.lis.Count; j++)
+                {
+                    nc = (NodCon)nl.lis[j];
+                    if (nc.id == a)
+                        nc.id = n;
+                }
+            }
+        }
+
+        // Analizar Grafo
+        public void anaLis()
+        {
+            ArrayList lisCon = new ArrayList();
+
+            // Cerradura de 0
+            ArrayList tem = new ArrayList();
+            tem.Add(0);
+            int ind = 0;
+            lisCon.Add(new SubCon('c', 0, tokEps(), obtCer(tem, tokEps()), ind++));
+
+            // Terminales
+            Console.WriteLine("//////////////////");
+            ArrayList ter = obtTer();
+            /*Token tk;
+            for (int i = 0; i < ter.Count; i++)
+            {
+                tk = (Token)ter[i];
+                Console.WriteLine("ID:" + tk.ide + " TK:" + tk.tok + " LE:" + tk.lex);
+            }*/
+
+            Console.WriteLine("//////////////////");
+            SubCon s;
+            for (int i = 0; i < lisCon.Count; i++)
+            {
+                s = (SubCon)lisCon[i];
+
+                if (s.tip == 'c')
+                {
+                    Token tk;
+                    for (int j = 0; j < ter.Count; j++)
+                    {
+                        tk = (Token)ter[j];
+                        ArrayList mt = obtMue(s.lis, tk);
+                        if (mt.Count > 0)
+                        {
+                            int con = verCon(lisCon, mt, 'm');
+                            if (con == -1)
+                                lisCon.Add(new SubCon('m', s.con, tk, mt, ind++));
+                            else
+                                lisCon.Add(new SubCon('m', s.con, tk, mt, con));
+                        }
+                    }
+                }
+                else if (s.tip == 'm')
+                {
+                    if (s.lis.Count > 0)
+                    {
+                        int con = verCon(lisCon, s.lis, 'c');
+                        if (con == -1)
+                            lisCon.Add(new SubCon('c', 0, tokEps(), obtCer(s.lis, tokEps()), s.con));
+                    }
+                }
+
+
+                if (s.tip == 'c')
+                {
+                    Console.WriteLine(s.tip + "=" + s.con);
+                }
+                else
+                {
+                    Console.WriteLine(s.tip + "(" + s.mue + ", " + s.tok.lex + ") = " + s.con);
+                }
+
+
+                for (int j = 0; j < s.lis.Count; j++)
+                {
+                    int e = (int)s.lis[j];
+                    Console.Write(e + " ");
+                }
+
+                Console.WriteLine();
+            }
+
+        }
+
+        // Verificar y Buscar
+        private Boolean busTok(Token tok, ArrayList lis)
+        {
+            Token tem;
+            for (int i = 0; i < lis.Count; i++)
+            {
+                tem = (Token)lis[i];
+                if (verTok(tok, tem))
+                    return true;
+            }
+            return false;
+        }
+
+        private Boolean verTok(Token a, Token b)
+        {
+            if (a.ide == b.ide)
+                if (a.tok.Equals(b.tok))
+                    if (a.lex.Equals(b.lex))
+                        return true;
+            return false;
+        }
+
+        private int verCon(ArrayList lisCon, ArrayList nueCon, char tip)
+        {
+            SubCon s;
+            for (int i = 0; i < lisCon.Count; i++)
+            {
+                s = (SubCon)lisCon[i];
+                s.lis.Sort();
+                nueCon.Sort();
+
+                if (s.tip == tip)
+                {
+                    if (s.lis.Count == nueCon.Count)
+                    {
+                        Boolean ver = true;
+                        for (int j = 0; j < nueCon.Count; j++)
+                        {
+                            if ((int)nueCon[j] != (int)s.lis[j])
+                                ver = false;
+                        }
+                        if (ver)
+                            return s.con;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        // Cerraduras
+        private ArrayList obtCer(ArrayList lb, Token le)
+        {
+            ArrayList c = new ArrayList();
+
+            int e;
+            for (int i = 0; i < lb.Count; i++)
+            {
+                e = (int)lb[i]; // elemento
+                c.Add(e);
+            }
+
+            for (int a = 0; a < c.Count; a++)
+            {
+                e = (int)c[a]; // elemento
+                NodList nl;
+                for (int i = 0; i < lis.Count; i++)
+                {
+                    nl = (NodList)lis[i]; // elemento
+                    if (nl.id == e)
+                    {
+                        NodCon nc;
+                        for (int j = 0; j < nl.lis.Count; j++)
+                        {
+                            nc = (NodCon)nl.lis[j]; // elemento
+                            if (verTok(le, nc.tk))
+                                c.Add(nc.id);
+                        }
+                    }
+                }
+            }
+
+            return c;
+        }
+
+        private ArrayList obtMue(ArrayList c, Token le)
+        {
+            ArrayList m = new ArrayList();
+
+            int e;
+            for (int a = 0; a < c.Count; a++)
+            {
+                e = (int)c[a]; // elemento
+                NodList nl;
+                for (int i = 0; i < lis.Count; i++)
+                {
+                    nl = (NodList)lis[i]; // elemento
+                    if (nl.id == e)
+                    {
+                        NodCon nc;
+                        for (int j = 0; j < nl.lis.Count; j++)
+                        {
+                            nc = (NodCon)nl.lis[j]; // elemento
+                            if (verTok(le, nc.tk))
+                                m.Add(nc.id);
+                        }
+                    }
+                }
+            }
+
+            return m;
+        }
+
+        private ArrayList obtTer()
+        {
+            ArrayList lt = new ArrayList();
+
+            NodList nl;
+            for (int i = 0; i < lis.Count; i++)
+            {
+                nl = (NodList)lis[i];
+                NodCon nc;
+                for (int j = 0; j < nl.lis.Count; j++)
+                {
+                    nc = (NodCon)nl.lis[j];
+
+                    if (!verTok(nc.tk, tokEps()))
+                        if (!busTok(nc.tk, lt))
+                            lt.Add(nc.tk);
+                }
+            }
+            return lt;
+        }
+
+        // otros
+        private Token tokEps()
+        {
+            return new Token(0, Token.EPS, "ε", 0, 0);
+        }
+    }
+
+    class NodList
+    {
+        /////////////////////
+        public int id;
+        public ArrayList lis;
+
+        /////////////////////
+        public NodList(int id, NodCon nue)
+        {
+            this.lis = new ArrayList();
+            this.lis.Add(nue);
+            this.id = id;
+        }
+
+        /////////////////////
+        public void agregar(NodCon nue)
+        {
+            Boolean ver = true;
+            for (int i = 0; i < this.lis.Count; i++)
+            {
+                NodCon ele = (NodCon)this.lis[i];
+                if (ele.id == nue.id)
+                {
+                    ver = false;
+                    break;
+                }
+            }
+            if (ver)
+                this.lis.Add(nue);
+        }
+
+    }
+
+    class NodCon
+    {
+        /////////////////////
+        public int id;
+        public Token tk;
+
+        /////////////////////
+        public NodCon(int id, Token tk)
+        {
+            this.id = id;
+            this.tk = tk;
+        }
+
+        /////////////////////
+
+    }
+
+    class SubCon
+    {
+        /////////////////////
+        public char tip;
+        public int con, mue;
+        public Token tok;
+        public ArrayList lis;
+
+        /////////////////////    
+        public SubCon(char tip, int mue, Token tok, ArrayList lis, int con)
+        {
+            this.tip = tip;
+            this.mue = mue;
+            this.tok = tok;
+            this.lis = lis;
+            this.con = con;
+        }
+
+
+        /////////////////////
 
 
     }
+
 }

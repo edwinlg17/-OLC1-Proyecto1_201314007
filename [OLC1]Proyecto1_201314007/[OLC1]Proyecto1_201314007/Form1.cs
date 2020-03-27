@@ -110,7 +110,7 @@ namespace _OLC1_Proyecto1_201314007
             {
                 guaArc();
             }
-            else 
+            else
             {
                 System.IO.StreamWriter file = new System.IO.StreamWriter((String)ruts[tcPes.SelectedIndex]);
                 file.WriteLine(tcPes.SelectedTab.Controls[0].Text);
@@ -155,8 +155,8 @@ namespace _OLC1_Proyecto1_201314007
             this.tcPes.SelectedTab = this.tcPes.TabPages[ind - 1];
             this.rtEnt.Focus();
         }
-        
-        private void guaArc() 
+
+        private void guaArc()
         {
             SaveFileDialog sfd = new SaveFileDialog();
 
@@ -167,13 +167,59 @@ namespace _OLC1_Proyecto1_201314007
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                // Write the string to a file.
                 System.IO.StreamWriter file = new System.IO.StreamWriter(sfd.FileName);
                 file.WriteLine(tcPes.SelectedTab.Controls[0].Text);
                 ruts[tcPes.SelectedIndex] = sfd.FileName;
                 tcPes.SelectedTab.Text = Path.GetFileName(sfd.FileName);
                 file.Close();
             }
+        }
+
+        private void miRep_Click(object sender, EventArgs e)
+        {
+            String tex = tcPes.SelectedTab.Controls[0].Text;
+            AnalizadorLexico l = new AnalizadorLexico();
+            l.analizar(tex);
+
+            String cod = "<html>\n";
+            cod += "\t<head>\n";
+            cod += "\t\t<title>Tokens</title>\n";
+            cod += "\t</head>\n";
+            cod += "\t<body>\n";
+            cod += "\t\t<h1>Listado de Tokens</h1>\n";
+            cod += "\t\t<table border=\"1\">\n";
+            cod += "\t\t\t<tr>\n";
+            cod += "\t\t\t\t<td>ID</td>\n";
+            cod += "\t\t\t\t<td>Token</td>\n";
+            cod += "\t\t\t\t<td>Lexema</td>\n";
+            cod += "\t\t\t\t<td>Fila</td>\n";
+            cod += "\t\t\t\t<td>Columna</td>\n";
+            cod += "\t\t\t</tr>\n";
+
+            ArrayList lisTok = l.lisTok;
+            for (int i = 0; i < lisTok.Count; i++)
+            {
+                Token t = (Token)lisTok[i];
+                cod += "\t\t\t<tr>\n";
+                cod += "\t\t\t\t<td>" + t.ide + "</td>\n";
+                cod += "\t\t\t\t<td>" + t.tok + "</td>\n";
+                cod += "\t\t\t\t<td>" + t.lex + "</td>\n";
+                cod += "\t\t\t\t<td>" + t.fil + "</td>\n";
+                cod += "\t\t\t\t<td>" + t.col + "</td>\n";
+                cod += "\t\t\t</tr>\n";
+            }
+
+            cod += "\t\t</table>\n";
+            cod += "\t</body>\n";
+            cod += "</html>\n";
+
+
+            Environment.CurrentDirectory = Environment.GetEnvironmentVariable("USERPROFILE");
+            DirectoryInfo info = new DirectoryInfo(".");
+
+            System.IO.StreamWriter file = new System.IO.StreamWriter(info.FullName + "/Desktop/Diagramas/Tokens.html");
+            file.WriteLine(cod);
+            file.Close();
         }
     }
 }
